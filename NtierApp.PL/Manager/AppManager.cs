@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NtierApp.BLL.Services;
+using NtierApp.Core.Models;
 
 namespace NtierApp.PL.Manager
 {
@@ -42,61 +43,23 @@ namespace NtierApp.PL.Manager
 			}
 		}
 
-		public void OrderService()
+		private void OrderService()
 		{
-			while (true)
-			{
-				Console.WriteLine(" ORDER SERVICE ");
-				Console.WriteLine("~~~~~~~~~~~~~~");
-				Console.WriteLine("1 - Add new order");
-				Console.WriteLine("2 - Delete order");
-				Console.WriteLine("3 - Show all orders");
-				Console.WriteLine("4 — Orders by date range");
-				Console.WriteLine("5 — Orders by amount range");
-				Console.WriteLine("6 — Orders for a specific date");
-				Console.WriteLine("7 — Order details by ID");
-				Console.WriteLine("0 - Exit");
-				var input = int.Parse(Console.ReadLine());
-				
-				switch (input)
-				{
-					case 1:
-						orderService.AddOrder();
-						break;
+			Console.WriteLine(" ORDER SERVICE ");
+			Console.WriteLine("~~~~~~~~~~~~~~");
+			Console.WriteLine("1 - Add new order");
+			Console.WriteLine("2 - Delete order");
+			Console.WriteLine("3 - Show all orders");
+			Console.WriteLine("4 — Orders by date range");
+			Console.WriteLine("5 — Orders by amount range");
+			Console.WriteLine("6 — Orders for a specific date");
+			Console.WriteLine("7 — Order details by ID");
+			Console.WriteLine("0 - Exit");
+			var input = int.Parse(Console.ReadLine());
 
-					case 2:
-						orderService.RemoveOrder();
-						break;
-
-					case 3:
-						orderService.Orders();
-						break;
-
-					case 4:
-						orderService.GetOrdersByDatesInterval();
-						break;
-
-					case 5:
-						orderService.GetOrdersByPriceInterval();
-						break;
-
-					case 6:
-						orderService.GetOrderByDate();
-						break;
-
-					case 7:
-						orderService.GetOrderByNo();
-						break;
-
-					case 0:
-						return;
-
-				}
-
-			}
 		}
 
-		public void MenuService()
+		private void MenuService()
 		{
 			Console.WriteLine(" MENU SERVICE ");
 			Console.WriteLine("~~~~~~~~~~~~~~");
@@ -110,31 +73,25 @@ namespace NtierApp.PL.Manager
 			Console.WriteLine("0 - Exit");
 			var input = int.Parse(Console.ReadLine());
 
-			switch (input)
+			if (input == 1)
 			{
-				case 1:
-					menuItemService.AddMenuItem();
-					break;
-				case 2:
-					menuItemService.EditMenuItem();
-					break;
-				case 3:
-					menuItemService.RemoveMenuItem();
-					break;
-				case 4:
-					menuItemService.MenuItems();
-					break;
-				case 5:
-					menuItemService.GetByCategory();
-					break;
-				case 6:
-					menuItemService.GetByPriceInterval();
-					break;
-				case 7:
-					menuItemService.GetByName();
-					break;
-				case 0:
-					return;
+				Console.WriteLine("Enter item details:");
+				Console.WriteLine("Name:");
+				var name = Console.ReadLine();
+				Console.WriteLine("Price:");
+				var price = decimal.Parse(Console.ReadLine());
+
+				MenuItem menuItem = new MenuItem();
+
+				string Name = name!;
+				decimal Price = price;
+
+				menuItem.Name = name!;
+				menuItem.Price = price;
+
+				MenuItemService menuItemService = new MenuItemService();
+
+				menuItemService.AddMenuItem(menuItem);
 
 			}
 		}
