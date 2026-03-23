@@ -12,7 +12,7 @@ namespace NtierApp.Core.Models
 		public string Name { get; set; } = null!;
 		public decimal Price { get; set; }
 		public Enum.Category Category { get; set; }
-		public OrderItem? OrderItem { get; set; }
+		public List<OrderItem> OrderItems { get; set; } = null!;
 
 	}
 }

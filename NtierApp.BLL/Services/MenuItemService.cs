@@ -14,7 +14,7 @@ namespace NtierApp.BLL.Services
 	public class MenuItemService() : IMenuItem
 	{
 		Context ntierDbContext = new Context();
-		async Task<List<MenuItem>> IMenuItem.MenuItems()
+		public async Task<List<MenuItem>> MenuItems()
 		{
 			return await ntierDbContext.MenuItems
 			.AsNoTracking() 

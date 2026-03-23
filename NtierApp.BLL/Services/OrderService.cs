@@ -4,12 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NtierApp.BLL.Interfaces;
+using NtierApp.Core.Models;
 
 namespace NtierApp.BLL.Services
 {
 	public class OrderService : IOrder
 	{
-		public void AddOrder()
+		public void Orders()
+		{
+			throw new NotImplementedException();
+		}
+		public void AddOrder(OrderItem orderItem)
 		{
 			throw new NotImplementedException();
 		}
@@ -34,14 +39,10 @@ namespace NtierApp.BLL.Services
 			throw new NotImplementedException();
 		}
 
-		public void Orders()
-		{
-			throw new NotImplementedException();
-		}
-
 		public void RemoveOrder()
 		{
 			throw new NotImplementedException();
 		}
+
 	}
 }

@@ -43,22 +43,6 @@ namespace NtierApp.PL.Manager
 			}
 		}
 
-		private void OrderService()
-		{
-			Console.WriteLine(" ORDER SERVICE ");
-			Console.WriteLine("~~~~~~~~~~~~~~");
-			Console.WriteLine("1 - Add new order");
-			Console.WriteLine("2 - Delete order");
-			Console.WriteLine("3 - Show all orders");
-			Console.WriteLine("4 — Orders by date range");
-			Console.WriteLine("5 — Orders by amount range");
-			Console.WriteLine("6 — Orders for a specific date");
-			Console.WriteLine("7 — Order details by ID");
-			Console.WriteLine("0 - Exit");
-			var input = int.Parse(Console.ReadLine());
-
-		}
-
 		private void MenuService()
 		{
 			Console.WriteLine(" MENU SERVICE ");
@@ -75,7 +59,7 @@ namespace NtierApp.PL.Manager
 
 			if (input == 1)
 			{
-				Console.WriteLine("Enter item details:");
+				Console.WriteLine("Enter item details");
 				Console.WriteLine("Name:");
 				var name = Console.ReadLine();
 				Console.WriteLine("Price:");
@@ -94,6 +78,95 @@ namespace NtierApp.PL.Manager
 				menuItemService.AddMenuItem(menuItem);
 
 			}
+
+			if (input == 2)
+			{
+				MenuItem UpdatedMenuItem = new MenuItem();
+				Console.WriteLine("Enter item details");
+				Console.WriteLine("Id:");
+				Guid id = Guid.Parse(Console.ReadLine());
+				Console.WriteLine("Name:");
+				UpdatedMenuItem.Name = Console.ReadLine();
+				Console.WriteLine("Price:");
+				UpdatedMenuItem.Price = int.Parse(Console.ReadLine());
+
+				MenuItemService menuItemService = new MenuItemService();
+
+				menuItemService.EditMenuItem(id, UpdatedMenuItem);
+
+			}
+
+			if (input == 3)
+			{
+				MenuItem UpdatedMenuItem = new MenuItem();
+				Console.WriteLine("Enter item details");
+				Console.WriteLine("Id:");
+				Guid id = Guid.Parse(Console.ReadLine());
+
+				MenuItemService menuItemService = new MenuItemService();
+
+				menuItemService.RemoveMenuItem(id);
+
+			}
+
+			if (input == 4)
+			{
+				MenuItemService menuItemService = new MenuItemService();
+
+				menuItemService.MenuItems();
+			}
+
+			if (input == 5)
+			{
+
+			}
+
+			if (input == 6)
+			{
+				MenuItemService menuItemService = new MenuItemService();
+
+				Console.WriteLine("Enter item details");
+				Console.WriteLine("Min price:");
+				var minPrice = int.Parse(Console.ReadLine());
+				Console.WriteLine("Max price:");
+				var maxPrice = int.Parse(Console.ReadLine());
+
+				menuItemService.GetByPriceInterval(minPrice, maxPrice);
+			}
+
+			if (input == 7)
+			{
+				MenuItemService menuItemService = new MenuItemService();
+
+				Console.WriteLine("Enter item details");
+				Console.WriteLine("Name:");
+				var Name = Console.ReadLine();
+
+				menuItemService.GetByName(Name);
+			}
+
+			if (input == 0)
+			{
+				return;
+			}
 		}
+
+		private void OrderService()
+		{
+			Console.WriteLine(" ORDER SERVICE ");
+			Console.WriteLine("~~~~~~~~~~~~~~");
+			Console.WriteLine("1 - Add new order");
+			Console.WriteLine("2 - Delete order");
+			Console.WriteLine("3 - Show all orders");
+			Console.WriteLine("4 — Orders by date range");
+			Console.WriteLine("5 — Orders by amount range");
+			Console.WriteLine("6 — Orders for a specific date");
+			Console.WriteLine("7 — Order details by ID");
+			Console.WriteLine("0 - Exit");
+			var input = int.Parse(Console.ReadLine());
+
+		}
+
+		
 	}
 }

@@ -14,8 +14,8 @@ namespace NtierApp.DAL.Configurations
 		public void Configure(EntityTypeBuilder<OrderItem> builder)
 		{
 			builder.HasOne(m => m.MenuItem)
-			.WithOne(oi => oi.OrderItem)
-			.HasForeignKey<OrderItem>(oi => oi.MenuItemId);
+			.WithMany(oi => oi.OrderItems)
+			.HasForeignKey(oi => oi.MenuItemId);
 		}
 	}
 }
