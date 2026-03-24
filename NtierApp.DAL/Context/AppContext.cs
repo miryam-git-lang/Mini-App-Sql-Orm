@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +8,12 @@ using NtierApp.Core.Models;
 
 namespace NtierApp.DAL.Context
 {
-	public class Context : DbContext
+	public class AppDbContext : DbContext
 	{
 		public DbSet<MenuItem> MenuItems { get; set; } = null!;
 		public DbSet<OrderItem> OrderItems { get; set; } = null!;
 		public DbSet<Order> Orders { get; set; } = null!;
+		public DbSet<Category> Categories { get; set; } = null!;
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{

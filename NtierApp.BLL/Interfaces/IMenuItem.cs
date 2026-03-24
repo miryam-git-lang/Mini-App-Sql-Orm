@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NtierApp.Core.Models;
-using static NtierApp.Core.Models.Enum;
 namespace NtierApp.BLL.Interfaces
 {
 	public interface IMenuItem
@@ -14,9 +13,9 @@ namespace NtierApp.BLL.Interfaces
 		Task<MenuItem> AddMenuItem(MenuItem menuItem);
 		Task<MenuItem> RemoveMenuItem(Guid id);
 		Task<MenuItem> EditMenuItem(Guid id, MenuItem menuItem);
-		Task<MenuItem> GetByCategory(Category category);
-		Task<MenuItem> GetByPriceInterval(decimal minPrice, decimal maxPrice);
-		Task<MenuItem> GetByName(string name);
+		Task<List<MenuItem>> GetByCategory(string category);
+		Task<List<MenuItem>> GetByPriceInterval(decimal minPrice, decimal maxPrice);
+		Task<List<MenuItem>> GetByName(string name);
 
 	}
 }

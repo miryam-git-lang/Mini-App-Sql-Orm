@@ -7,26 +7,36 @@ using Microsoft.EntityFrameworkCore;
 using NtierApp.BLL.Interfaces;
 using NtierApp.Core.Models;
 using NtierApp.DAL.Context;
-using static NtierApp.Core.Models.Enum;
 
 namespace NtierApp.BLL.Services
 {
 	public class MenuItemService() : IMenuItem
 	{
-		Context ntierDbContext = new Context();
+		AppDbContext ntierDbContext = new AppDbContext();
 		public async Task<List<MenuItem>> MenuItems()
 		{
 			return await ntierDbContext.MenuItems
-			.AsNoTracking() 
-			.ToListAsync();
+				.Include(m => m.Category)
+				.AsNoTracking()
+				.ToListAsync();
 		}
 
 		public async Task<MenuItem> AddMenuItem(MenuItem menuItem)
 		{
+			var existingCategory = await ntierDbContext.Categories
+					.FirstOrDefaultAsync(c => c.Name == menuItem.Category.Name);
+			menuItem.CategoryId = existingCategory.id;
+
+			if (existingCategory == null)
+				throw new Exception("Category not found");
+
 			if (string.IsNullOrWhiteSpace(menuItem.Name))
 				throw new ArgumentException(nameof(menuItem.Name), "Menu item cannot be empty");
 
-			if(await ntierDbContext.MenuItems.AnyAsync(n => n.Name.ToLower() == menuItem.Name.ToLower()))
+			if (string.IsNullOrWhiteSpace(menuItem.Category.Name))
+				throw new ArgumentException(nameof(menuItem.Category.Name), "Category cannot be empty");
+
+			if (await ntierDbContext.MenuItems.AnyAsync(n => n.Name.ToLower() == menuItem.Name.ToLower()))
 				throw new ArgumentException(nameof(menuItem.Name), "This item is already exists");
 
 			if (menuItem.Price <= 0)
@@ -72,23 +82,37 @@ namespace NtierApp.BLL.Services
 			}
 		}
 
-		public async Task<MenuItem> GetByCategory(Category category)
+		public async Task<List<MenuItem>> GetByCategory(string category)
 		{
-			throw new NotImplementedException();
+			var menuItems = await ntierDbContext.MenuItems
+				.Where(m => m.Category.Name == category)
+				.AsNoTracking()
+				.ToListAsync();
+
+			return menuItems;
 		}
-		public async Task<MenuItem> GetByName(string name)
+		public async Task<List<MenuItem>> GetByName(string name)
 		{
-			var existingMenuItemName = await ntierDbContext.MenuItems.FirstOrDefaultAsync(m => m.Name == name);
-			if (existingMenuItemName == null)
-				throw new ArgumentException(nameof(name), $"Menu item with name: {name} not found");
-			else
-				return existingMenuItemName;
+			var menuItems = await ntierDbContext.MenuItems
+				.Where(m => m.Name == name)
+				.AsNoTracking()
+				.ToListAsync();
+
+			return menuItems;
 
 		}
-		public async Task<MenuItem> GetByPriceInterval(decimal minPrice, decimal maxPrice)
+		public async Task<List<MenuItem>> GetByPriceInterval(decimal minPrice, decimal maxPrice)
 		{
-			throw new NotImplementedException();
+			var menuItems = await ntierDbContext.MenuItems
+				.Where(m => m.Price >= minPrice && m.Price <= maxPrice)
+				.AsNoTracking()
+				.ToListAsync();
+				
+			if (menuItems.Count == 0)
+				throw new Exception("Nothing found");
+
+			return menuItems;
 		}
-	
+
 	}
 }

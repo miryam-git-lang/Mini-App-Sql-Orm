@@ -8,13 +8,14 @@ namespace NtierApp.Core.Models
 {
 	public class OrderItem
 	{
-		public Guid id { get; set; }
+		public Guid Id { get; set; }
+
+		public Guid MenuItemId { get; set; }
+		public MenuItem MenuItem { get; set; }
+
+		public Guid OrderId { get; set; }
+		public Order Order { get; set; }
+
 		public int Count { get; set; }
-		public int MenuItemId { get; set; }
-		public MenuItem MenuItem { get; set; } = null!;
-		public int OrderId { get; set; }
-		public Order Order { get; set; } = null!;
-
-
 	}
 }

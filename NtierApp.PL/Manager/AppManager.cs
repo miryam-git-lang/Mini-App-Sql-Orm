@@ -43,7 +43,7 @@ namespace NtierApp.PL.Manager
 			}
 		}
 
-		private void MenuService()
+		private async Task MenuService()
 		{
 			Console.WriteLine(" MENU SERVICE ");
 			Console.WriteLine("~~~~~~~~~~~~~~");
@@ -56,7 +56,6 @@ namespace NtierApp.PL.Manager
 			Console.WriteLine("7 — Search by name");
 			Console.WriteLine("0 - Exit");
 			var input = int.Parse(Console.ReadLine());
-
 			if (input == 1)
 			{
 				Console.WriteLine("Enter item details");
@@ -64,18 +63,18 @@ namespace NtierApp.PL.Manager
 				var name = Console.ReadLine();
 				Console.WriteLine("Price:");
 				var price = decimal.Parse(Console.ReadLine());
+				Console.WriteLine("Category:");
+				var category = Console.ReadLine();
 
 				MenuItem menuItem = new MenuItem();
 
-				string Name = name!;
-				decimal Price = price;
-
 				menuItem.Name = name!;
 				menuItem.Price = price;
+				menuItem.Category.Name = category!;
 
 				MenuItemService menuItemService = new MenuItemService();
 
-				menuItemService.AddMenuItem(menuItem);
+				await menuItemService.AddMenuItem(menuItem);
 
 			}
 
@@ -85,14 +84,32 @@ namespace NtierApp.PL.Manager
 				Console.WriteLine("Enter item details");
 				Console.WriteLine("Id:");
 				Guid id = Guid.Parse(Console.ReadLine());
-				Console.WriteLine("Name:");
-				UpdatedMenuItem.Name = Console.ReadLine();
-				Console.WriteLine("Price:");
-				UpdatedMenuItem.Price = int.Parse(Console.ReadLine());
+				Console.WriteLine("Choose what to change");
+				Console.WriteLine("1 - Name");
+				Console.WriteLine("2 - Category");
+				Console.WriteLine("3 - Price");
+				var input1 = int.Parse(Console.ReadLine());
+				if (input1 == 1)
+				{
+					Console.WriteLine("Name:");
+					UpdatedMenuItem.Name = Console.ReadLine();
+				}
+
+				if (input1 == 2)
+				{
+					Console.WriteLine("Category:");
+					UpdatedMenuItem.Category.Name = Console.ReadLine();
+				}
+
+				if (input1 == 2)
+				{
+					Console.WriteLine("Price:");
+					UpdatedMenuItem.Price = int.Parse(Console.ReadLine());
+				}	
 
 				MenuItemService menuItemService = new MenuItemService();
 
-				menuItemService.EditMenuItem(id, UpdatedMenuItem);
+				await menuItemService.EditMenuItem(id, UpdatedMenuItem);
 
 			}
 
@@ -105,7 +122,7 @@ namespace NtierApp.PL.Manager
 
 				MenuItemService menuItemService = new MenuItemService();
 
-				menuItemService.RemoveMenuItem(id);
+				await menuItemService.RemoveMenuItem(id);
 
 			}
 
@@ -113,12 +130,25 @@ namespace NtierApp.PL.Manager
 			{
 				MenuItemService menuItemService = new MenuItemService();
 
-				menuItemService.MenuItems();
+				var items = await menuItemService.MenuItems();
+
+				foreach (var item in items)
+					Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
 			}
 
 			if (input == 5)
 			{
+				MenuItemService menuItemService = new MenuItemService();
 
+				Console.WriteLine("Enter item details");
+				Console.WriteLine("Category:");
+				var category = Console.ReadLine();
+
+
+				var items = await menuItemService.GetByCategory(category);
+
+				foreach (var item in items)
+					Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
 			}
 
 			if (input == 6)
@@ -127,11 +157,14 @@ namespace NtierApp.PL.Manager
 
 				Console.WriteLine("Enter item details");
 				Console.WriteLine("Min price:");
-				var minPrice = int.Parse(Console.ReadLine());
+				var minPrice = decimal.Parse(Console.ReadLine());
 				Console.WriteLine("Max price:");
-				var maxPrice = int.Parse(Console.ReadLine());
+				var maxPrice = decimal.Parse(Console.ReadLine());
 
-				menuItemService.GetByPriceInterval(minPrice, maxPrice);
+				var items = await menuItemService.GetByPriceInterval(minPrice, maxPrice);
+
+				foreach (var item in items)
+					Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
 			}
 
 			if (input == 7)
@@ -142,7 +175,14 @@ namespace NtierApp.PL.Manager
 				Console.WriteLine("Name:");
 				var Name = Console.ReadLine();
 
-				menuItemService.GetByName(Name);
+				var items = await menuItemService.GetByName(Name);
+
+				foreach (var item in items)
+				{
+					Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
+				}
+
+
 			}
 
 			if (input == 0)

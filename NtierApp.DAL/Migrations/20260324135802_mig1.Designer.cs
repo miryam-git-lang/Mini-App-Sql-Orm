@@ -11,8 +11,8 @@ using NtierApp.DAL.Context;
 
 namespace NtierApp.DAL.Migrations
 {
-    [DbContext(typeof(DbContext))]
-    [Migration("20260323172356_mig1")]
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20260324135802_mig1")]
     partial class mig1
     {
         /// <inheritdoc />
@@ -65,30 +65,24 @@ namespace NtierApp.DAL.Migrations
 
             modelBuilder.Entity("NtierApp.Core.Models.OrderItem", b =>
                 {
-                    b.Property<Guid>("id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Count")
                         .HasColumnType("int");
 
-                    b.Property<int>("MenuItemId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("MenuItemId1")
+                    b.Property<Guid>("MenuItemId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("OrderId1")
+                    b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
-                    b.HasIndex("MenuItemId1");
+                    b.HasIndex("MenuItemId");
 
-                    b.HasIndex("OrderId1");
+                    b.HasIndex("OrderId");
 
                     b.ToTable("OrderItems");
                 });
@@ -97,13 +91,13 @@ namespace NtierApp.DAL.Migrations
                 {
                     b.HasOne("NtierApp.Core.Models.MenuItem", "MenuItem")
                         .WithMany("OrderItems")
-                        .HasForeignKey("MenuItemId1")
+                        .HasForeignKey("MenuItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("NtierApp.Core.Models.Order", "Order")
                         .WithMany("OrderItems")
-                        .HasForeignKey("OrderId1")
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

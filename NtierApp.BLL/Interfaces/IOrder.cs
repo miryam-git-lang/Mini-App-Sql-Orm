@@ -9,13 +9,13 @@ namespace NtierApp.BLL.Interfaces
 {
 	public interface IOrder
 	{
-		public void Orders();
-		public void AddOrder(OrderItem orderItem);
-		public void RemoveOrder();
-		public void GetOrdersByDatesInterval();
-		public void GetOrderByDate();
-		public void GetOrdersByPriceInterval();
-		public void GetOrderByNo();
+		Task<List<Order>> Orders();
+		Task<Order> AddOrder();
+		Task<Order> RemoveOrder(Guid id);
+		Task<List<Order>> GetOrdersByDatesInterval(DateTime date1, DateTime date2);
+		Task<List<Order>> GetOrderByDate(DateTime date);
+		Task<List<Order>> GetOrdersByPriceInterval(decimal min,decimal max);
+		Task<List<Order>> GetOrderByNo(Guid No);
 
 	}
 }

@@ -6,20 +6,11 @@ using System.Threading.Tasks;
 
 namespace NtierApp.Core.Models
 {
-	public class Enum
+	public class Category
 	{
-		public enum Category	
-		{
-			Appetizer,
-			Soup,
-			Salad,
-			MainCourse,
-			Grill,
-			Dessert,
-			Drink
-		}
+		public Guid id { get; set; }
+		public string Name { get; set; }
+		public List<MenuItem> MenuItems { get; set; }
+
 	}
-
-
-	
 }

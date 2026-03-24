@@ -3,46 +3,85 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using NtierApp.BLL.Interfaces;
 using NtierApp.Core.Models;
+using NtierApp.DAL.Context;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NtierApp.BLL.Services
 {
 	public class OrderService : IOrder
 	{
-		public void Orders()
+		AppDbContext ntierDbContext = new AppDbContext();
+
+		public async Task<List<Order>> Orders()
 		{
-			throw new NotImplementedException();
+			return await ntierDbContext.Orders
+				.Include(o => o.OrderItems) 
+				.ThenInclude(oi => oi.MenuItem)
+				.AsNoTracking()
+				.ToListAsync();
 		}
-		public void AddOrder(OrderItem orderItem)
+
+		public async Task<Order> AddOrder()
 		{
 			throw new NotImplementedException();
 		}
 
-		public void GetOrderByDate()
+		public async Task<List<Order>> GetOrderByDate(DateTime date)
 		{
-			throw new NotImplementedException();
+			var orders = await ntierDbContext.Orders
+				.Where(o => o.Date == date)
+				.Include(o => o.OrderItems)
+				.AsNoTracking()
+				.ToListAsync();
+
+			return orders;
 		}
 
-		public void GetOrderByNo()
+		public async Task<List<Order>> GetOrderByNo(Guid No)
 		{
-			throw new NotImplementedException();
+			var orders = await ntierDbContext.Orders
+				.Include(o => o.OrderItems)
+				.ThenInclude(oi => oi.MenuItem)
+				.FirstOrDefaultAsync(o => o.Id == No);
+
+			return orders;
 		}
 
-		public void GetOrdersByDatesInterval()
+		public async Task<List<Order>> GetOrdersByDatesInterval(DateTime date1, DateTime date2)
 		{
-			throw new NotImplementedException();
+			var orders = await ntierDbContext.Orders
+				.Where(o => o.Date >= date1 && o.Date <= date2)
+				.AsNoTracking()
+				.ToListAsync();
+
+			return orders;
 		}
 
-		public void GetOrdersByPriceInterval()
+		public async Task<List<Order>> GetOrdersByPriceInterval(decimal minPrice, decimal maxPrice)
 		{
-			throw new NotImplementedException();
+			var orders = await ntierDbContext.Orders
+				.Where(o => o.TotalAmount >= minPrice && o.TotalAmount <= maxPrice)
+				.AsNoTracking()
+				.ToListAsync();
+
+			return orders;
 		}
 
-		public void RemoveOrder()
+		
+		public async Task<Order> RemoveOrder(Guid id)
 		{
-			throw new NotImplementedException();
+			var existingOrder = await ntierDbContext.Orders.FirstOrDefaultAsync(m => m.Id == id);
+			if (existingOrder == null)
+				throw new ArgumentException(nameof(id), $"Order with id {id} not found");
+			else
+			{
+				ntierDbContext.Orders.Remove(existingOrder);
+				await ntierDbContext.SaveChangesAsync();
+				return existingOrder;
+			}
 		}
-
 	}
 }
