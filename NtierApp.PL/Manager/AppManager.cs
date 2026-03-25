@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using NtierApp.BLL.Services;
 using NtierApp.Core.Models;
+using NtierApp.DAL.Concretes;
+using NtierApp.DAL.Context;
+using NtierApp.DAL.Interfaces;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using static NtierApp.Core.Models.Enum;
 using Enum = System.Enum;
@@ -13,8 +16,6 @@ namespace NtierApp.PL.Manager
 {
 	public class AppManager
 	{
-		private MenuItemService menuItemService = new MenuItemService();
-		private OrderService orderService = new OrderService();
 
 		public void Start()
 		{
@@ -118,7 +119,8 @@ namespace NtierApp.PL.Manager
 					menuItem.Price = price;
 					menuItem.Category = selectedCategory;
 
-					MenuItemService menuItemService = new MenuItemService();
+					IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
+					MenuItemService menuItemService = new MenuItemService(MenuRepository);
 					try
 					{
 						await menuItemService.AddMenuItem(menuItem);
@@ -157,9 +159,10 @@ namespace NtierApp.PL.Manager
 				{
 					Console.WriteLine("Price:");
 					UpdatedMenuItem.Price = int.Parse(Console.ReadLine());
-				}	
+				}
 
-				MenuItemService menuItemService = new MenuItemService();
+				IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
+				MenuItemService menuItemService = new MenuItemService(MenuRepository);
 
 				await menuItemService.EditMenuItem(id, UpdatedMenuItem);
 
@@ -172,15 +175,16 @@ namespace NtierApp.PL.Manager
 				Console.WriteLine("Id:");
 				Guid id = Guid.Parse(Console.ReadLine());
 
-				MenuItemService menuItemService = new MenuItemService();
-
+				IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
+				MenuItemService menuItemService = new MenuItemService(MenuRepository);
 				await menuItemService.RemoveMenuItem(id);
 
 			}
 
 			else if (input == 4)
 			{
-				MenuItemService menuItemService = new MenuItemService();
+				IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
+				MenuItemService menuItemService = new MenuItemService(MenuRepository);
 
 				var items = await menuItemService.MenuItems();
 
@@ -190,9 +194,10 @@ namespace NtierApp.PL.Manager
 
 		else if (input == 5)
 		{
-			MenuItemService menuItemService = new MenuItemService();
+				IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
+				MenuItemService menuItemService = new MenuItemService(MenuRepository);
 
-			Console.WriteLine("Enter item details");
+				Console.WriteLine("Enter item details");
 			Console.WriteLine("Category (Appetizer, Soup, Salad, MainCourse, Grill, Dessert, Drink):");
 			var categoryInput = Console.ReadLine();
 
@@ -211,7 +216,8 @@ namespace NtierApp.PL.Manager
 
 			else if (input == 6)
 			{
-				MenuItemService menuItemService = new MenuItemService();
+				IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
+				MenuItemService menuItemService = new MenuItemService(MenuRepository);
 
 				Console.WriteLine("Enter item details");
 				Console.WriteLine("Min price:");
@@ -227,7 +233,8 @@ namespace NtierApp.PL.Manager
 
 			else if (input == 7)
 			{
-				MenuItemService menuItemService = new MenuItemService();
+				IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
+				MenuItemService menuItemService = new MenuItemService(MenuRepository);
 
 				Console.WriteLine("Enter item details");
 				Console.WriteLine("Name:");
@@ -281,12 +288,14 @@ namespace NtierApp.PL.Manager
 				menuItem.Name = name!;
 				menuItem.Price = price;
 
-				MenuItemService menuItemService = new MenuItemService();
+				IRepository<MenuItem> menuItemRepository = new Repository<MenuItem>(new AppDbContext());
+				MenuItemService menuItemService = new MenuItemService(menuItemRepository);
 
 				Console.WriteLine("Count:");
 				int count = int.Parse(Console.ReadLine());
 
-				OrderService orderService = new OrderService();
+				IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
+				OrderService orderService = new OrderService(orderRepository);
 				await orderService.AddOrder(menuItem, count);
 			}
 			else if(input == 2)
@@ -296,20 +305,25 @@ namespace NtierApp.PL.Manager
 				Console.WriteLine("Id:");
 				Guid id = Guid.Parse(Console.ReadLine());
 
-				OrderService orderService = new OrderService();
+				IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
+				OrderService orderService = new OrderService(orderRepository);
 
 				await orderService.RemoveOrder(id);
 			}
 			else if(input == 3)
 			{
-				OrderService orderService = new OrderService();
+				IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
+				OrderService orderService = new OrderService(orderRepository);
+
 				var orders = await orderService.Orders();
 				foreach (var order in orders)
 					Console.WriteLine($"{order.Id} {order.TotalAmount} {order.Date}");
 			}
 			else if(input == 4)
 			{
-				OrderService orderService = new OrderService();
+				IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
+				OrderService orderService = new OrderService(orderRepository);
+
 				Console.WriteLine("Enter order details");
 				Console.WriteLine("Start date:");
 				DateTime startDate = DateTime.Parse(Console.ReadLine());
@@ -321,7 +335,9 @@ namespace NtierApp.PL.Manager
 			}
 			else if(input == 5)
 			{
-			    OrderService orderService = new OrderService();
+				IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
+				OrderService orderService = new OrderService(orderRepository);
+
 				Console.WriteLine("Enter order details");
 				Console.WriteLine("Min amount:");
 				decimal minAmount = decimal.Parse(Console.ReadLine());
@@ -332,7 +348,9 @@ namespace NtierApp.PL.Manager
 			}
 			else if(input == 6)
 			{
-			    OrderService orderService = new OrderService();
+				IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
+				OrderService orderService = new OrderService(orderRepository);
+
 				Console.WriteLine("Enter order details");
 				Console.WriteLine("Date:");
 				DateTime date = DateTime.Parse(Console.ReadLine());
@@ -342,7 +360,9 @@ namespace NtierApp.PL.Manager
 			}
 			else if(input == 7)
 			{
-				OrderService orderService = new OrderService();
+				IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
+				OrderService orderService = new OrderService(orderRepository);
+
 				Console.WriteLine("Enter order details");
 				Console.WriteLine("Id:");
 				Guid id = Guid.Parse(Console.ReadLine());
