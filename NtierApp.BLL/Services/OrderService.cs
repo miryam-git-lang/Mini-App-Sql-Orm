@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NtierApp.BLL.Interfaces;
 using NtierApp.Core.Models;
 using NtierApp.DAL.Context;
@@ -24,9 +25,25 @@ namespace NtierApp.BLL.Services
 				.ToListAsync();
 		}
 
-		public async Task<Order> AddOrder()
+		public async Task<Order> AddOrder(MenuItem menuItem, int count)
 		{
-			throw new NotImplementedException();
+			Order order = new Order();
+			OrderItem orderItem = new OrderItem();
+			order.Date = DateTime.Now;
+			order.TotalAmount += menuItem.Price * count;
+
+			orderItem.MenuItemId = menuItem.Id;
+			orderItem.Count = count;
+
+			orderItem.Order = order;
+			
+			
+			
+
+			ntierDbContext.Orders.Add(order);
+			await ntierDbContext.SaveChangesAsync();
+
+			return order;
 		}
 
 		public async Task<List<Order>> GetOrderByDate(DateTime date)
@@ -40,7 +57,7 @@ namespace NtierApp.BLL.Services
 			return orders;
 		}
 
-		public async Task<List<Order>> GetOrderByNo(Guid No)
+		public async Task<Order> GetOrderByNo(Guid No)
 		{
 			var orders = await ntierDbContext.Orders
 				.Include(o => o.OrderItems)
@@ -50,10 +67,10 @@ namespace NtierApp.BLL.Services
 			return orders;
 		}
 
-		public async Task<List<Order>> GetOrdersByDatesInterval(DateTime date1, DateTime date2)
+		public async Task<List<Order>> GetOrdersByDatesInterval(DateTime startDate, DateTime endDate)
 		{
 			var orders = await ntierDbContext.Orders
-				.Where(o => o.Date >= date1 && o.Date <= date2)
+				.Where(o => o.Date >= startDate && o.Date <= endDate)
 				.AsNoTracking()
 				.ToListAsync();
 

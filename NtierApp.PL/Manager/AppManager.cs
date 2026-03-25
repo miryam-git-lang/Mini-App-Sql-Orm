@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NtierApp.BLL.Services;
 using NtierApp.Core.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NtierApp.PL.Manager
 {
@@ -78,7 +79,7 @@ namespace NtierApp.PL.Manager
 
 			}
 
-			if (input == 2)
+			else if (input == 2)
 			{
 				MenuItem UpdatedMenuItem = new MenuItem();
 				Console.WriteLine("Enter item details");
@@ -95,13 +96,13 @@ namespace NtierApp.PL.Manager
 					UpdatedMenuItem.Name = Console.ReadLine();
 				}
 
-				if (input1 == 2)
+				else if (input1 == 2)
 				{
 					Console.WriteLine("Category:");
 					UpdatedMenuItem.Category.Name = Console.ReadLine();
 				}
 
-				if (input1 == 2)
+				else if (input1 == 2)
 				{
 					Console.WriteLine("Price:");
 					UpdatedMenuItem.Price = int.Parse(Console.ReadLine());
@@ -113,7 +114,7 @@ namespace NtierApp.PL.Manager
 
 			}
 
-			if (input == 3)
+			else if (input == 3)
 			{
 				MenuItem UpdatedMenuItem = new MenuItem();
 				Console.WriteLine("Enter item details");
@@ -126,7 +127,7 @@ namespace NtierApp.PL.Manager
 
 			}
 
-			if (input == 4)
+			else if (input == 4)
 			{
 				MenuItemService menuItemService = new MenuItemService();
 
@@ -136,7 +137,7 @@ namespace NtierApp.PL.Manager
 					Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
 			}
 
-			if (input == 5)
+			else if (input == 5)
 			{
 				MenuItemService menuItemService = new MenuItemService();
 
@@ -151,7 +152,7 @@ namespace NtierApp.PL.Manager
 					Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
 			}
 
-			if (input == 6)
+			else if (input == 6)
 			{
 				MenuItemService menuItemService = new MenuItemService();
 
@@ -167,7 +168,7 @@ namespace NtierApp.PL.Manager
 					Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
 			}
 
-			if (input == 7)
+			else if (input == 7)
 			{
 				MenuItemService menuItemService = new MenuItemService();
 
@@ -185,13 +186,13 @@ namespace NtierApp.PL.Manager
 
 			}
 
-			if (input == 0)
+			else if (input == 0)
 			{
 				return;
 			}
 		}
 
-		private void OrderService()
+		private async Task OrderService()
 		{
 			Console.WriteLine(" ORDER SERVICE ");
 			Console.WriteLine("~~~~~~~~~~~~~~");
@@ -204,6 +205,97 @@ namespace NtierApp.PL.Manager
 			Console.WriteLine("7 — Order details by ID");
 			Console.WriteLine("0 - Exit");
 			var input = int.Parse(Console.ReadLine());
+
+			if(input == 1)
+			{
+				Order order = new Order();
+				Console.WriteLine("Enter order details");
+				Console.WriteLine("Menu item id:");
+				Guid menuItemId = Guid.Parse(Console.ReadLine());
+				Console.WriteLine("Name:");
+				var name = Console.ReadLine();
+				Console.WriteLine("Price:");
+				var price = decimal.Parse(Console.ReadLine());
+				Console.WriteLine("Category:");
+				var category = Console.ReadLine();
+
+				MenuItem menuItem = new MenuItem();
+
+				menuItem.Name = name!;
+				menuItem.Price = price;
+				menuItem.Category.Name = category!;
+
+				MenuItemService menuItemService = new MenuItemService();
+
+				Console.WriteLine("Count:");
+				int count = int.Parse(Console.ReadLine());
+
+				OrderService orderService = new OrderService();
+				await orderService.AddOrder(menuItem, count);
+			}
+			else if(input == 2)
+			{
+				Order order = new Order();
+				Console.WriteLine("Enter order details");
+				Console.WriteLine("Id:");
+				Guid id = Guid.Parse(Console.ReadLine());
+
+				OrderService orderService = new OrderService();
+
+				await orderService.RemoveOrder(id);
+			}
+			else if(input == 3)
+			{
+				OrderService orderService = new OrderService();
+				var orders = await orderService.Orders();
+				foreach (var order in orders)
+					Console.WriteLine($"{order.Id} {order.TotalAmount} {order.Date}");
+			}
+			else if(input == 4)
+			{
+				OrderService orderService = new OrderService();
+				Console.WriteLine("Enter order details");
+				Console.WriteLine("Start date:");
+				DateTime startDate = DateTime.Parse(Console.ReadLine());
+				Console.WriteLine("End date:");
+				DateTime endDate = DateTime.Parse(Console.ReadLine());
+				var orders = await orderService.GetOrdersByDatesInterval(startDate, endDate);
+				foreach (var order in orders)
+					Console.WriteLine($"{order.Id} {order.TotalAmount} {order.Date}");
+			}
+			else if(input == 5)
+			{
+			    OrderService orderService = new OrderService();
+				Console.WriteLine("Enter order details");
+				Console.WriteLine("Min amount:");
+				decimal minAmount = decimal.Parse(Console.ReadLine());
+				decimal maxAmount = decimal.Parse(Console.ReadLine());
+				var orders = await orderService.GetOrdersByPriceInterval(minAmount, maxAmount);
+				foreach (var order in orders)
+					Console.WriteLine($"{order.Id} {order.TotalAmount} {order.Date}");
+			}
+			else if(input == 6)
+			{
+			    OrderService orderService = new OrderService();
+				Console.WriteLine("Enter order details");
+				Console.WriteLine("Date:");
+				DateTime date = DateTime.Parse(Console.ReadLine());
+				var orders = await orderService.GetOrderByDate(date);
+				foreach (var order in orders)
+					Console.WriteLine($"{order.Id} {order.TotalAmount}  {order.Date}");
+			}
+			else if(input == 7)
+			{
+				OrderService orderService = new OrderService();
+				Console.WriteLine("Enter order details");
+				Console.WriteLine("Id:");
+				Guid id = Guid.Parse(Console.ReadLine());
+				Console.WriteLine(orderService.GetOrderByNo(id));
+			}
+			 else if (input == 0)
+			 {
+				 return;
+			 }
 
 		}
 
