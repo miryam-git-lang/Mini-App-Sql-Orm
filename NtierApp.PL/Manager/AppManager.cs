@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using NtierApp.BLL.Services;
 using NtierApp.Core.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using static NtierApp.Core.Models.Enum;
+using Enum = System.Enum;
 
 namespace NtierApp.PL.Manager
 {
@@ -48,35 +50,90 @@ namespace NtierApp.PL.Manager
 		{
 			Console.WriteLine(" MENU SERVICE ");
 			Console.WriteLine("~~~~~~~~~~~~~~");
-			Console.WriteLine("1 â€” Add new item");
-			Console.WriteLine("2 â€” Edit item");
-			Console.WriteLine("3 â€” Delete item");
-			Console.WriteLine("4 â€” Show all items");
-			Console.WriteLine("5 â€” Show by category");
-			Console.WriteLine("6 â€” Show by price range");
-			Console.WriteLine("7 â€” Search by name");
+			Console.WriteLine("1 — Add new item");
+			Console.WriteLine("2 — Edit item");
+			Console.WriteLine("3 — Delete item");
+			Console.WriteLine("4 — Show all items");
+			Console.WriteLine("5 — Show by category");
+			Console.WriteLine("6 — Show by price range");
+			Console.WriteLine("7 — Search by name");
 			Console.WriteLine("0 - Exit");
 			var input = int.Parse(Console.ReadLine());
 			if (input == 1)
 			{
-				Console.WriteLine("Enter item details");
-				Console.WriteLine("Name:");
-				var name = Console.ReadLine();
-				Console.WriteLine("Price:");
-				var price = decimal.Parse(Console.ReadLine());
-				Console.WriteLine("Category:");
-				var category = Console.ReadLine();
+				while (true)
+				{
+					Console.WriteLine("Enter item details");
+					Console.WriteLine("Name:");
+					var name = Console.ReadLine();
 
-				MenuItem menuItem = new MenuItem();
+					if (name?.ToLower() == "q")
+					{
+						Console.WriteLine("Operation cancelled.");
+						break;
+					}
 
-				menuItem.Name = name!;
-				menuItem.Price = price;
-				menuItem.Category.Name = category!;
+					Console.WriteLine("Price:");
+					var priceInput = Console.ReadLine();
 
-				MenuItemService menuItemService = new MenuItemService();
+					if (priceInput?.ToLower() == "q")
+					{
+						Console.WriteLine("Operation cancelled.");
+						break;
+					}
 
-				await menuItemService.AddMenuItem(menuItem);
+					if (!decimal.TryParse(priceInput, out var price))
+					{
+						Console.WriteLine("Invalid price. Please enter a valid number.");
+						continue;
+					}
 
+					bool categoryValid = false;
+					Category selectedCategory = Category.Appetizer;
+
+					while (!categoryValid)
+					{
+						Console.WriteLine("Category (Appetizer, Soup, Salad, MainCourse, Grill, Dessert, Drink):");
+						var categoryInput = Console.ReadLine();
+
+						if (categoryInput?.ToLower() == "q")
+						{
+							Console.WriteLine("Operation cancelled.");
+							return;
+						}
+
+						if (Enum.TryParse<Category>(categoryInput, ignoreCase: true, out var category))
+						{
+							selectedCategory = category;
+							categoryValid = true;
+						}
+						else
+						{
+							Console.WriteLine("Invalid category. Please try again.");
+						}
+					}
+
+					MenuItem menuItem = new MenuItem();
+					menuItem.Name = name!;
+					menuItem.Price = price;
+					menuItem.Category = selectedCategory;
+
+					MenuItemService menuItemService = new MenuItemService();
+					try
+					{
+						await menuItemService.AddMenuItem(menuItem);
+						Console.WriteLine("Item added successfully!");
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine($"Error adding item: {ex.Message}");
+						if (ex.InnerException != null)
+						{
+							Console.WriteLine($"Inner error: {ex.InnerException.Message}");
+						}
+					}
+					break;
+				}
 			}
 
 			else if (input == 2)
@@ -87,7 +144,6 @@ namespace NtierApp.PL.Manager
 				Guid id = Guid.Parse(Console.ReadLine());
 				Console.WriteLine("Choose what to change");
 				Console.WriteLine("1 - Name");
-				Console.WriteLine("2 - Category");
 				Console.WriteLine("3 - Price");
 				var input1 = int.Parse(Console.ReadLine());
 				if (input1 == 1)
@@ -96,11 +152,6 @@ namespace NtierApp.PL.Manager
 					UpdatedMenuItem.Name = Console.ReadLine();
 				}
 
-				else if (input1 == 2)
-				{
-					Console.WriteLine("Category:");
-					UpdatedMenuItem.Category.Name = Console.ReadLine();
-				}
 
 				else if (input1 == 2)
 				{
@@ -137,20 +188,26 @@ namespace NtierApp.PL.Manager
 					Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
 			}
 
-			else if (input == 5)
+		else if (input == 5)
+		{
+			MenuItemService menuItemService = new MenuItemService();
+
+			Console.WriteLine("Enter item details");
+			Console.WriteLine("Category (Appetizer, Soup, Salad, MainCourse, Grill, Dessert, Drink):");
+			var categoryInput = Console.ReadLine();
+
+			if (System.Enum.TryParse<NtierApp.Core.Models.Enum.Category>(categoryInput, ignoreCase: true, out var category))
 			{
-				MenuItemService menuItemService = new MenuItemService();
-
-				Console.WriteLine("Enter item details");
-				Console.WriteLine("Category:");
-				var category = Console.ReadLine();
-
-
 				var items = await menuItemService.GetByCategory(category);
 
 				foreach (var item in items)
 					Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
 			}
+			else
+			{
+				Console.WriteLine("Invalid category. Please enter a valid category.");
+			}
+		}
 
 			else if (input == 6)
 			{
@@ -199,10 +256,10 @@ namespace NtierApp.PL.Manager
 			Console.WriteLine("1 - Add new order");
 			Console.WriteLine("2 - Delete order");
 			Console.WriteLine("3 - Show all orders");
-			Console.WriteLine("4 â€” Orders by date range");
-			Console.WriteLine("5 â€” Orders by amount range");
-			Console.WriteLine("6 â€” Orders for a specific date");
-			Console.WriteLine("7 â€” Order details by ID");
+			Console.WriteLine("4 — Orders by date range");
+			Console.WriteLine("5 — Orders by amount range");
+			Console.WriteLine("6 — Orders for a specific date");
+			Console.WriteLine("7 — Order details by ID");
 			Console.WriteLine("0 - Exit");
 			var input = int.Parse(Console.ReadLine());
 
@@ -223,7 +280,6 @@ namespace NtierApp.PL.Manager
 
 				menuItem.Name = name!;
 				menuItem.Price = price;
-				menuItem.Category.Name = category!;
 
 				MenuItemService menuItemService = new MenuItemService();
 

@@ -15,7 +15,9 @@ namespace NtierApp.DAL.Configurations
 		{
 			builder.ToTable("MenuItems");
 			builder.HasKey(x => x.Id);
-			builder.Property(x => x.Id).HasDefaultValueSql("NEWSEQUENTIALID()");
+			builder.Property(x => x.Id)
+				.HasDefaultValueSql("NEWSEQUENTIALID()")
+				.ValueGeneratedOnAdd();
 
 			builder
 				.Property(m => m.Name)
@@ -28,6 +30,11 @@ namespace NtierApp.DAL.Configurations
 			builder
 				.Property(m => m.Price)
 				.HasColumnType("decimal(18,2)");
+
+			builder
+				.Property(m => m.Category)
+				.HasConversion<int>()
+				.IsRequired();
 
 
 		}

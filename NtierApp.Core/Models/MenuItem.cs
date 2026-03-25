@@ -8,12 +8,12 @@ namespace NtierApp.Core.Models
 {
 	public class MenuItem
 	{
-		public Guid Id { get; set; }
+		public Guid Id { get; set; } = Guid.NewGuid();
 		public string Name { get; set; }
 		public decimal Price { get; set; }
 		public List<OrderItem> OrderItems { get; set; }
-		public Guid CategoryId { get; set; }
-		public Category Category { get; set; }
+        public Enum.Category Category { get; set; }
 
-	}
+
+    }
 }

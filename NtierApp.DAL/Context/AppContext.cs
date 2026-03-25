@@ -13,7 +13,6 @@ namespace NtierApp.DAL.Context
 		public DbSet<MenuItem> MenuItems { get; set; } = null!;
 		public DbSet<OrderItem> OrderItems { get; set; } = null!;
 		public DbSet<Order> Orders { get; set; } = null!;
-		public DbSet<Category> Categories { get; set; } = null!;
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
@@ -23,5 +22,10 @@ namespace NtierApp.DAL.Context
 			base.OnConfiguring(optionsBuilder);
 		}
 
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			base.OnModelCreating(modelBuilder);
+			modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+		}
 	}
 }

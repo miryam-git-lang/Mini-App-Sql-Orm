@@ -16,25 +16,15 @@ namespace NtierApp.BLL.Services
 		public async Task<List<MenuItem>> MenuItems()
 		{
 			return await ntierDbContext.MenuItems
-				.Include(m => m.Category)
 				.AsNoTracking()
 				.ToListAsync();
 		}
 
-		public async Task<MenuItem> AddMenuItem(MenuItem menuItem)
+		public async Task AddMenuItem(MenuItem menuItem)
 		{
-			var existingCategory = await ntierDbContext.Categories
-					.FirstOrDefaultAsync(c => c.Name == menuItem.Category.Name);
-			menuItem.CategoryId = existingCategory.id;
-
-			if (existingCategory == null)
-				throw new Exception("Category not found");
 
 			if (string.IsNullOrWhiteSpace(menuItem.Name))
 				throw new ArgumentException(nameof(menuItem.Name), "Menu item cannot be empty");
-
-			if (string.IsNullOrWhiteSpace(menuItem.Category.Name))
-				throw new ArgumentException(nameof(menuItem.Category.Name), "Category cannot be empty");
 
 			if (await ntierDbContext.MenuItems.AnyAsync(n => n.Name.ToLower() == menuItem.Name.ToLower()))
 				throw new ArgumentException(nameof(menuItem.Name), "This item is already exists");
@@ -44,7 +34,6 @@ namespace NtierApp.BLL.Services
 
 			ntierDbContext.MenuItems.Add(menuItem);
 			await ntierDbContext.SaveChangesAsync();
-			return menuItem;
 		}
 
 		public async Task<MenuItem> EditMenuItem(Guid id, MenuItem menuItem)
@@ -62,7 +51,6 @@ namespace NtierApp.BLL.Services
 			{
 				existingMenuItem.Name = menuItem.Name;
 				existingMenuItem.Price = menuItem.Price;
-				existingMenuItem.Category = menuItem.Category;
 				await ntierDbContext.SaveChangesAsync();
 				return existingMenuItem;
 			}
@@ -82,10 +70,10 @@ namespace NtierApp.BLL.Services
 			}
 		}
 
-		public async Task<List<MenuItem>> GetByCategory(string category)
+		public async Task<List<MenuItem>> GetByCategory(NtierApp.Core.Models.Enum.Category category)
 		{
 			var menuItems = await ntierDbContext.MenuItems
-				.Where(m => m.Category.Name == category)
+				.Where(m => m.Category == category)
 				.AsNoTracking()
 				.ToListAsync();
 
