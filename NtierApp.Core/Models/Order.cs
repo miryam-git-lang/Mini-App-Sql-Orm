@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NtierApp.Core.Models.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace NtierApp.Core.Models
 {
-	public class Order
-	{
-		public Guid Id { get; set; }
+	public class Order : BaseEntity
+    {
 		public List<OrderItem> OrderItems { get; set; }
 		public decimal TotalAmount { get; set; }
 		public DateTime Date { get; set; }

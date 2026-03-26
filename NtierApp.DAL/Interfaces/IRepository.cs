@@ -1,15 +1,16 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NtierApp.Core.Models;
+using NtierApp.Core.Models.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NtierApp.Core.Models;
 
 namespace NtierApp.DAL.Interfaces
 {
-    public interface IRepository<T> where T : class
+    public interface IRepository<T> where T : BaseEntity
     {
 		IQueryable<T> GetAll();
 		IQueryable<T> GetAll(bool isTracking = false,
@@ -23,6 +24,5 @@ namespace NtierApp.DAL.Interfaces
         void Delete(T entity);
         Task SaveChangesAsync();
 		Task<bool> IsExistAsync(Expression<Func<T, bool>>? filter = null);
-		Task<Order> Delete(Guid id);
-	}
+    }
 }

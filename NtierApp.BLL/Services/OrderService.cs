@@ -91,7 +91,7 @@ namespace NtierApp.BLL.Services
 		
 		public async Task<Order> RemoveOrder(Guid id)
 		{
-			var existingOrder = await repository.Delete(id);
+			var existingOrder = await repository.GetByIdAsync(id);
 			if (existingOrder == null)
 				throw new ArgumentException(nameof(id), $"Order with id {id} not found");
 			else
