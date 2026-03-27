@@ -16,10 +16,10 @@ namespace NtierApp.PL.Manager
 {
 	public class AppManager
 	{
-
 		public void Start()
 		{
-			while (true)
+
+            while (true)
 			{
 				Console.WriteLine(" MAIN MENU ");
 				Console.WriteLine("~~~~~~~~~~~~");
@@ -135,7 +135,9 @@ namespace NtierApp.PL.Manager
 						{
 							await menuItemService.AddMenuItem(menuItem);
 							Console.WriteLine("Item added successfully!");
-						}
+							Console.WriteLine(menuItem.CreatedAt);
+
+                        }
 						catch (Exception ex)
 						{
 							Console.WriteLine($"Error adding item: {ex.Message}");
@@ -157,7 +159,7 @@ namespace NtierApp.PL.Manager
 					Console.WriteLine("Available items:");
 					var items = await menuItemService.MenuItems();
 					foreach (var item in items)
-						Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
+						Console.WriteLine($"{item.Number} {item.Name} {item.Price}");
 
 					Console.WriteLine("Enter item details");
 					Console.WriteLine("Id:");
@@ -198,7 +200,7 @@ namespace NtierApp.PL.Manager
 					Console.WriteLine("Available items:");
 					var items = await menuItemService.MenuItems();
 					foreach (var item in items)
-						Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
+						Console.WriteLine($"{item.Number} {item.Name} {item.Price}");
 
 					Console.WriteLine("Enter item details");
 					Console.WriteLine("Id:");
@@ -222,7 +224,7 @@ namespace NtierApp.PL.Manager
 					var items = await menuItemService.MenuItems();
 
 					foreach (var item in items)
-						Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
+						Console.WriteLine($"{item.Number} {item.Name} {item.Price}");
 				}
 
 				else if (input == 5)
@@ -239,7 +241,7 @@ namespace NtierApp.PL.Manager
 						var items = await menuItemService.GetByCategory(category);
 
 						foreach (var item in items)
-							Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
+							Console.WriteLine($"{item.Number} {item.Name} {item.Price}");
 					}
 					else
 					{
@@ -258,11 +260,11 @@ namespace NtierApp.PL.Manager
 					Console.WriteLine("Max price:");
 					var maxPrice = decimal.Parse(Console.ReadLine());
 
-					var items = await menuItemService.GetByPriceInterval(minPrice, maxPrice);
+				var items = await menuItemService.GetByPriceInterval(minPrice, maxPrice);
 
-					foreach (var item in items)
-						Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
-				}
+				foreach (var item in items)
+					Console.WriteLine($"{item.Number} {item.Name} {item.Price}");
+			}
 
 				else if (input == 7)
 				{
@@ -273,15 +275,15 @@ namespace NtierApp.PL.Manager
 					Console.WriteLine("Name:");
 					var Name = Console.ReadLine();
 
-					var items = await menuItemService.GetByName(Name);
+				var items = await menuItemService.GetByName(Name);
 
-					foreach (var item in items)
-						Console.WriteLine($"{item.Id} {item.Name} {item.Price}");
+				foreach (var item in items)
+					Console.WriteLine($"{item.Number} {item.Name} {item.Price}");
 
-				}
+			}
 
-				else if (input == 0)
-					return;
+			else if (input == 0)
+				return;
 			}
 		}
 
@@ -368,10 +370,10 @@ namespace NtierApp.PL.Manager
 						IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
 						OrderService orderService = new OrderService(orderRepository);
 
-						var orders = await orderService.Orders();
-						foreach (var order in orders)
-							Console.WriteLine($"{order.Id} {order.TotalAmount} {order.Date}");
-					}
+					var orders = await orderService.Orders();
+					foreach (var order in orders)
+						Console.WriteLine($"{order.Number} {order.TotalAmount} {order.Date}");
+				}
 					catch (Exception ex)
 					{
 						Console.WriteLine($"Error retrieving orders: {ex.Message}");
@@ -389,10 +391,10 @@ namespace NtierApp.PL.Manager
 						DateTime startDate = DateTime.Parse(Console.ReadLine());
 						Console.WriteLine("End date:");
 						DateTime endDate = DateTime.Parse(Console.ReadLine());
-						var orders = await orderService.GetOrdersByDatesInterval(startDate, endDate);
-						foreach (var order in orders)
-							Console.WriteLine($"{order.Id} {order.TotalAmount} {order.Date}");
-					}
+					var orders = await orderService.GetOrdersByDatesInterval(startDate, endDate);
+					foreach (var order in orders)
+						Console.WriteLine($"{order.Number} {order.TotalAmount} {order.Date}");
+				}
 					catch (Exception ex)
 					{
 						Console.WriteLine($"Error retrieving orders: {ex.Message}");
@@ -410,10 +412,10 @@ namespace NtierApp.PL.Manager
 						decimal minAmount = decimal.Parse(Console.ReadLine());
 						Console.WriteLine("Max amount:");
 						decimal maxAmount = decimal.Parse(Console.ReadLine());
-						var orders = await orderService.GetOrdersByPriceInterval(minAmount, maxAmount);
-						foreach (var order in orders)
-							Console.WriteLine($"{order.Id} {order.TotalAmount} {order.Date}");
-					}
+					var orders = await orderService.GetOrdersByPriceInterval(minAmount, maxAmount);
+					foreach (var order in orders)
+						Console.WriteLine($"{order.Number} {order.TotalAmount} {order.Date}");
+				}
 					catch (Exception ex)
 					{
 						Console.WriteLine($"Error retrieving orders: {ex.Message}");
@@ -429,10 +431,10 @@ namespace NtierApp.PL.Manager
 						Console.WriteLine("Enter order details");
 						Console.WriteLine("Date:");
 						DateTime date = DateTime.Parse(Console.ReadLine());
-						var orders = await orderService.GetOrderByDate(date);
-						foreach (var order in orders)
-							Console.WriteLine($"{order.Id} {order.TotalAmount}  {order.Date}");
-					}
+					var orders = await orderService.GetOrderByDate(date);
+					foreach (var order in orders)
+						Console.WriteLine($"{order.Number} {order.TotalAmount}  {order.Date}");
+				}
 					catch (Exception ex)
 					{
 						Console.WriteLine($"Error retrieving orders: {ex.Message}");
@@ -458,6 +460,10 @@ namespace NtierApp.PL.Manager
 				else if (input == 0)
 					return;
 			}
-		}
-	}
+            
+
+        }
+       
+    }
+	
 }

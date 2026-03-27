@@ -16,6 +16,11 @@ namespace NtierApp.DAL.Configurations
 			builder.HasOne(m => m.MenuItem)
 			.WithMany(oi => oi.OrderItems)
 			.HasForeignKey(oi => oi.MenuItemId);
+
+			builder
+				.Property(oi => oi.Number)
+				.ValueGeneratedOnAdd()
+				.UseIdentityColumn();
 		}
 	}
 }

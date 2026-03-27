@@ -95,6 +95,5 @@ namespace NtierApp.BLL.Services
 
 			return menuItems;
 		}
-
 	}
 }

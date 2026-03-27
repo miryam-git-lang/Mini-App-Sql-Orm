@@ -22,7 +22,7 @@ namespace NtierApp.DAL.Configurations
 			builder
 				.Property(m => m.Name)
 				.IsRequired()
-				.HasMaxLength(20);
+				.HasMaxLength(50);
 			builder
 				.HasIndex(m => m.Name)
 				.IsUnique();
@@ -36,7 +36,10 @@ namespace NtierApp.DAL.Configurations
 				.HasConversion<int>()
 				.IsRequired();
 
-
+			builder
+				.Property(m => m.Number)
+				.ValueGeneratedOnAdd()
+				.UseIdentityColumn();
 		}
 	}
 }
