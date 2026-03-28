@@ -49,26 +49,23 @@ namespace NtierApp.DAL.Concretes
         {
             await context.SaveChangesAsync();
         }
-
-        public IQueryable<T> GetAll(bool isTracking = false, Expression<Func<T, bool>>? filter = null, int page = 1, int take = 2, params string[] includes)
-        {
-            var query = Table.AsQueryable();
-            if(!isTracking) 
-                query = query.AsNoTracking();
-            if(filter != null)
-                query = query.Where(filter);
-
-            foreach (var include in includes)
-                query = query.Include(include);
-            query = query.Skip((page - 1) * take).Take(take);
-
-            return query;
-
-        }
-
         public Task<bool> IsExistAsync(Expression<Func<T, bool>>? filter = null)
         {
             return Table.AnyAsync(filter);
         }
-    }
+
+		public IQueryable<T> GetAll(bool isTracking = false, Expression<Func<T, bool>>? filter = null, int page = 1, int take = 10, params string[] includes)
+		{
+			var query = Table.AsQueryable();
+			if (!isTracking)
+				query = query.AsNoTracking();
+			if (filter != null)
+				query = query.Where(filter);
+
+			foreach (var include in includes)
+				query = query.Include(include);
+			
+			return query;
+		}
+	}
 }

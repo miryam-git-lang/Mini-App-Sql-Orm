@@ -14,21 +14,24 @@ using Enum = System.Enum;
 
 namespace NtierApp.PL.Manager
 {
-	public class AppManager
+ public class AppManager
 	{
-		public void Start()
+	 public void Start()
 		{
+			Console.OutputEncoding = Encoding.UTF8;
+			Console.InputEncoding = Encoding.UTF8;
 
-            while (true)
+			while (true)
 			{
-				Console.WriteLine(" MAIN MENU ");
-				Console.WriteLine("~~~~~~~~~~~~");
-				Console.WriteLine("1 - Perform operations on the menu");
-				Console.WriteLine("2 - Perform operations on the order");
-				Console.WriteLine("0 - Exit");
-				if (!int.TryParse(Console.ReadLine(), out var input))
+				DrawBanner("Main Menu");
+				WriteOption(1, "Perform operations on the menu");
+				WriteOption(2, "Perform operations on the order");
+				WriteOption(0, "Exit");
+				WriteDivider();
+
+				if (!TryReadInt("Select option", out var input))
 				{
-					Console.WriteLine("Invalid input. Please enter a valid number.");
+					WriteStatus("Invalid input. Please enter a valid number.", ConsoleColor.Red);
 					continue;
 				}
 
@@ -51,23 +54,23 @@ namespace NtierApp.PL.Manager
 				}
 			}
 		}
-		private async Task MenuService()
+        private async Task MenuService()
 		{
 			while (true)
 			{
-				Console.WriteLine(" MENU SERVICE ");
-				Console.WriteLine("~~~~~~~~~~~~~~");
-				Console.WriteLine("1 — Add new item");
-				Console.WriteLine("2 — Edit item");
-				Console.WriteLine("3 — Delete item");
-				Console.WriteLine("4 — Show all items");
-				Console.WriteLine("5 — Show by category");
-				Console.WriteLine("6 — Show by price range");
-				Console.WriteLine("7 — Search by name");
-				Console.WriteLine("0 - Exit");
-				if (!int.TryParse(Console.ReadLine(), out var input))
+				DrawBanner("Menu Service");
+				WriteOption(1, "Add new item");
+				WriteOption(2, "Edit item");
+				WriteOption(3, "Delete item");
+				WriteOption(4, "Show all items");
+				WriteOption(5, "Show by category");
+				WriteOption(6, "Show by price range");
+				WriteOption(7, "Search by name");
+				WriteOption(0, "Exit");
+				WriteDivider();
+				if (!TryReadInt("Select option", out var input))
 				{
-					Console.WriteLine("Invalid input. Please enter a valid number.");
+					WriteStatus("Invalid input. Please enter a valid number.", ConsoleColor.Red);
 					continue;
 				}
 				if (input == 1)
@@ -135,9 +138,7 @@ namespace NtierApp.PL.Manager
 						{
 							await menuItemService.AddMenuItem(menuItem);
 							Console.WriteLine("Item added successfully!");
-							Console.WriteLine(menuItem.CreatedAt);
-
-                        }
+						}
 						catch (Exception ex)
 						{
 							Console.WriteLine($"Error adding item: {ex.Message}");
@@ -156,10 +157,9 @@ namespace NtierApp.PL.Manager
 					IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
 					MenuItemService menuItemService = new MenuItemService(MenuRepository);
 
-					Console.WriteLine("Available items:");
-					var items = await menuItemService.MenuItems();
-					foreach (var item in items)
-						Console.WriteLine($"{item.Number} {item.Name} {item.Price}");
+                Console.WriteLine("Available items:");
+				var items = await menuItemService.MenuItems();
+				PrintMenuItemsTable(items);
 
 					Console.WriteLine("Enter item details");
 					Console.WriteLine("Id:");
@@ -197,10 +197,9 @@ namespace NtierApp.PL.Manager
 					IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
 					MenuItemService menuItemService = new MenuItemService(MenuRepository);
 
-					Console.WriteLine("Available items:");
-					var items = await menuItemService.MenuItems();
-					foreach (var item in items)
-						Console.WriteLine($"{item.Number} {item.Name} {item.Price}");
+                Console.WriteLine("Available items:");
+				var items = await menuItemService.MenuItems();
+				PrintMenuItemsTable(items);
 
 					Console.WriteLine("Enter item details");
 					Console.WriteLine("Id:");
@@ -223,8 +222,7 @@ namespace NtierApp.PL.Manager
 
 					var items = await menuItemService.MenuItems();
 
-					foreach (var item in items)
-						Console.WriteLine($"{item.Number} {item.Name} {item.Price}");
+                 PrintMenuItemsTable(items);
 				}
 
 				else if (input == 5)
@@ -236,12 +234,10 @@ namespace NtierApp.PL.Manager
 					Console.WriteLine("Category (Appetizer, Soup, Salad, MainCourse, Grill, Dessert, Drink):");
 					var categoryInput = Console.ReadLine();
 
-					if (System.Enum.TryParse<NtierApp.Core.Models.Enum.Category>(categoryInput, ignoreCase: true, out var category))
-					{
-						var items = await menuItemService.GetByCategory(category);
-
-						foreach (var item in items)
-							Console.WriteLine($"{item.Number} {item.Name} {item.Price}");
+                if (System.Enum.TryParse<NtierApp.Core.Models.Enum.Category>(categoryInput, ignoreCase: true, out var category))
+				{
+					var items = await menuItemService.GetByCategory(category);
+					PrintMenuItemsTable(items);
 					}
 					else
 					{
@@ -260,11 +256,9 @@ namespace NtierApp.PL.Manager
 					Console.WriteLine("Max price:");
 					var maxPrice = decimal.Parse(Console.ReadLine());
 
-				var items = await menuItemService.GetByPriceInterval(minPrice, maxPrice);
-
-				foreach (var item in items)
-					Console.WriteLine($"{item.Number} {item.Name} {item.Price}");
-			}
+                var items = await menuItemService.GetByPriceInterval(minPrice, maxPrice);
+				PrintMenuItemsTable(items);
+				}
 
 				else if (input == 7)
 				{
@@ -275,75 +269,91 @@ namespace NtierApp.PL.Manager
 					Console.WriteLine("Name:");
 					var Name = Console.ReadLine();
 
-				var items = await menuItemService.GetByName(Name);
+                var items = await menuItemService.GetByName(Name);
+				PrintMenuItemsTable(items);
 
-				foreach (var item in items)
-					Console.WriteLine($"{item.Number} {item.Name} {item.Price}");
+				}
 
-			}
-
-			else if (input == 0)
-				return;
+				else if (input == 0)
+					return;
 			}
 		}
 
-		private async Task OrderService()
+       private async Task OrderService()
 		{
 			while (true)
 			{
-				Console.WriteLine(" ORDER SERVICE ");
-				Console.WriteLine("~~~~~~~~~~~~~~");
-				Console.WriteLine("1 - Add new order");
-				Console.WriteLine("2 - Delete order");
-				Console.WriteLine("3 - Show all orders");
-				Console.WriteLine("4 — Orders by date range");
-				Console.WriteLine("5 — Orders by amount range");
-				Console.WriteLine("6 — Orders for a specific date");
-				Console.WriteLine("7 — Order details by ID");
-				Console.WriteLine("0 - Exit");
-				if (!int.TryParse(Console.ReadLine(), out var input))
+				DrawBanner("Order Service");
+				WriteOption(1, "Add new order");
+				WriteOption(2, "Delete order");
+				WriteOption(3, "Show all orders");
+				WriteOption(4, "Orders by date range");
+				WriteOption(5, "Orders by amount range");
+				WriteOption(6, "Orders for a specific date");
+				WriteOption(7, "Order details by ID");
+				WriteOption(0, "Exit");
+				WriteDivider();
+				if (!TryReadInt("Select option", out var input))
 				{
-					Console.WriteLine("Invalid input. Please enter a valid number.");
+					WriteStatus("Invalid input. Please enter a valid number.", ConsoleColor.Red);
 					continue;
 				}
 
-				if(input == 1)
+				if (input == 1)
 				{
 					try
 					{
-						Order order = new Order();
-						Console.WriteLine("Enter order details");
-						Console.WriteLine("Menu item id:");
-						Guid menuItemId = Guid.Parse(Console.ReadLine());
-						Console.WriteLine("Name:");
-						var name = Console.ReadLine();
-						Console.WriteLine("Price:");
-						var price = decimal.Parse(Console.ReadLine());
-						Console.WriteLine("Category:");
-						var category = Console.ReadLine();
+					IRepository<MenuItem> menuRepository = new Repository<MenuItem>(new AppDbContext());
+					MenuItemService menuItemService = new MenuItemService(menuRepository);
+					IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
+					OrderService orderService = new OrderService(orderRepository);
 
-						MenuItem menuItem = new MenuItem();
+                  var items = await menuItemService.MenuItems();
+					if (items == null || items.Count == 0)
+					{
+						WriteStatus("Menu is empty. Please add items first.", ConsoleColor.Yellow);
+						continue;
+					}
 
-						menuItem.Name = name!;
-						menuItem.Price = price;
+					Console.WriteLine("Available menu items:");
+					PrintMenuItemsTable(items);
 
-						IRepository<MenuItem> menuItemRepository = new Repository<MenuItem>(new AppDbContext());
-						MenuItemService menuItemService = new MenuItemService(menuItemRepository);
+					var itemIdInput = Prompt("Enter menu item Id (Q to cancel)");
+					if (IsCancelInput(itemIdInput))
+					{
+						WriteStatus("Order creation cancelled.", ConsoleColor.DarkYellow);
+						continue;
+					}
 
-						Console.WriteLine("Count:");
-						int count = int.Parse(Console.ReadLine());
+					if (!Guid.TryParse(itemIdInput, out var menuItemId))
+					{
+						WriteStatus("Invalid Id. Please try again.", ConsoleColor.Red);
+						continue;
+					}
 
-						IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
-						OrderService orderService = new OrderService(orderRepository);
-						await orderService.AddOrder(menuItem, count);
-						Console.WriteLine("Order added successfully!");
+					var selectedItem = items.FirstOrDefault(m => m.Id == menuItemId);
+					if (selectedItem == null)
+					{
+						WriteStatus("Menu item not found. Please try again.", ConsoleColor.Red);
+						continue;
+					}
+
+					if (!TryReadInt("Quantity", out var count) || count <= 0)
+					{
+						WriteStatus("Quantity must be a positive number.", ConsoleColor.Red);
+						continue;
+					}
+
+                   var order = await orderService.AddOrder(selectedItem, count);
+					WriteStatus($"Order created successfully! ID: {order.Id} Â· Total: {FormatCurrency(order.TotalAmount)}", ConsoleColor.Green);
+
 					}
 					catch (Exception ex)
 					{
-						Console.WriteLine($"Error adding order: {ex.Message}");
+                 WriteStatus($"Error adding order: {ex.Message}", ConsoleColor.Red);
 					}
 				}
-				else if(input == 2)
+				else if (input == 2)
 				{
 					try
 					{
@@ -363,23 +373,22 @@ namespace NtierApp.PL.Manager
 						Console.WriteLine($"Error deleting order: {ex.Message}");
 					}
 				}
-				else if(input == 3)
+                else if (input == 3)
 				{
 					try
 					{
 						IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
 						OrderService orderService = new OrderService(orderRepository);
 
-					var orders = await orderService.Orders();
-					foreach (var order in orders)
-						Console.WriteLine($"{order.Number} {order.TotalAmount} {order.Date}");
-				}
+						var orders = await orderService.Orders();
+                       PrintOrdersTable(orders);
+					}
 					catch (Exception ex)
 					{
 						Console.WriteLine($"Error retrieving orders: {ex.Message}");
 					}
 				}
-				else if(input == 4)
+				else if (input == 4)
 				{
 					try
 					{
@@ -391,16 +400,15 @@ namespace NtierApp.PL.Manager
 						DateTime startDate = DateTime.Parse(Console.ReadLine());
 						Console.WriteLine("End date:");
 						DateTime endDate = DateTime.Parse(Console.ReadLine());
-					var orders = await orderService.GetOrdersByDatesInterval(startDate, endDate);
-					foreach (var order in orders)
-						Console.WriteLine($"{order.Number} {order.TotalAmount} {order.Date}");
-				}
+                        var orders = await orderService.GetOrdersByDatesInterval(startDate, endDate);
+						PrintOrdersTable(orders);
+					}
 					catch (Exception ex)
 					{
 						Console.WriteLine($"Error retrieving orders: {ex.Message}");
 					}
 				}
-				else if(input == 5)
+				else if (input == 5)
 				{
 					try
 					{
@@ -412,16 +420,15 @@ namespace NtierApp.PL.Manager
 						decimal minAmount = decimal.Parse(Console.ReadLine());
 						Console.WriteLine("Max amount:");
 						decimal maxAmount = decimal.Parse(Console.ReadLine());
-					var orders = await orderService.GetOrdersByPriceInterval(minAmount, maxAmount);
-					foreach (var order in orders)
-						Console.WriteLine($"{order.Number} {order.TotalAmount} {order.Date}");
-				}
+                        var orders = await orderService.GetOrdersByPriceInterval(minAmount, maxAmount);
+						PrintOrdersTable(orders);
+					}
 					catch (Exception ex)
 					{
 						Console.WriteLine($"Error retrieving orders: {ex.Message}");
 					}
 				}
-				else if(input == 6)
+				else if (input == 6)
 				{
 					try
 					{
@@ -431,16 +438,15 @@ namespace NtierApp.PL.Manager
 						Console.WriteLine("Enter order details");
 						Console.WriteLine("Date:");
 						DateTime date = DateTime.Parse(Console.ReadLine());
-					var orders = await orderService.GetOrderByDate(date);
-					foreach (var order in orders)
-						Console.WriteLine($"{order.Number} {order.TotalAmount}  {order.Date}");
-				}
+                        var orders = await orderService.GetOrderByDate(date);
+						PrintOrdersTable(orders);
+					}
 					catch (Exception ex)
 					{
 						Console.WriteLine($"Error retrieving orders: {ex.Message}");
 					}
 				}
-				else if(input == 7)
+                else if (input == 7)
 				{
 					try
 					{
@@ -450,7 +456,15 @@ namespace NtierApp.PL.Manager
 						Console.WriteLine("Enter order details");
 						Console.WriteLine("Id:");
 						Guid id = Guid.Parse(Console.ReadLine());
-						Console.WriteLine(orderService.GetOrderByNo(id));
+                     var order = await orderService.GetOrderByNo(id);
+						if (order == null)
+						{
+							Console.WriteLine("Order not found.");
+						}
+						else
+						{
+							PrintOrdersTable(new[] { order });
+						}
 					}
 					catch (Exception ex)
 					{
@@ -460,10 +474,91 @@ namespace NtierApp.PL.Manager
 				else if (input == 0)
 					return;
 			}
-            
 
-        }
-       
-    }
-	
+
+		}
+
+     private const string ManatSymbol = "â‚¼";
+
+		private static string FormatCurrency(decimal amount)
+		{
+			return $"{amount:0.00} {ManatSymbol}";
+		}
+
+		private static string FormatOrderItems(Order order)
+		{
+			if (order?.OrderItems == null || order.OrderItems.Count == 0)
+				return "-";
+
+			return string.Join(", ", order.OrderItems.Select(oi =>
+			{
+				var name = oi.MenuItem?.Name ?? "Item";
+				return $"{name} x{oi.Count}";
+			}));
+		}
+
+        private static void PrintMenuItemsTable(IEnumerable<MenuItem> items)
+		{
+			const string format = "{0,-36} | {1,-20} | {2,-12} | {3,15}";
+			Console.WriteLine();
+			Console.WriteLine(format, "ID", "Name", "Category", "Price");
+			Console.WriteLine(new string('-', 90));
+			foreach (var item in items)
+				Console.WriteLine(format, item.Id, item.Name, item.Category, FormatCurrency(item.Price));
+		}
+
+     private static void PrintOrdersTable(IEnumerable<Order> orders)
+		{
+			const string format = "{0,-36} | {1,15} | {2,19} | {3}";
+			Console.WriteLine();
+			Console.WriteLine(format, "ID", "Total", "Date", "Items");
+			Console.WriteLine(new string('-', 120));
+			foreach (var order in orders ?? Enumerable.Empty<Order>())
+			{
+				var dateText = order.Date.ToString("yyyy-MM-dd HH:mm");
+				Console.WriteLine(format, order.Id, FormatCurrency(order.TotalAmount), dateText, FormatOrderItems(order));
+			}
+		}
+
+		// Console helpers for consistent layout and input handling.
+		private static void DrawBanner(string title)
+		{
+			Console.WriteLine();
+			Console.WriteLine($"=== {title.ToUpperInvariant()} ===");
+		}
+
+		private static void WriteOption(int option, string description)
+		{
+			Console.WriteLine($"{option} - {description}");
+		}
+
+		private static void WriteDivider()
+		{
+			Console.WriteLine(new string('-', 30));
+		}
+
+		private static string Prompt(string label)
+		{
+			Console.Write($"{label}: ");
+			return Console.ReadLine()?.Trim() ?? string.Empty;
+		}
+
+		private static bool TryReadInt(string label, out int value)
+		{
+			var input = Prompt(label);
+			return int.TryParse(input, out value);
+		}
+
+		private static void WriteStatus(string message, ConsoleColor color)
+		{
+			Console.WriteLine(message);
+		}
+
+		private static bool IsCancelInput(string? input)
+		{
+			return string.Equals(input, "q", StringComparison.OrdinalIgnoreCase);
+		}
+
+	}
+
 }

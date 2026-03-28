@@ -29,27 +29,5 @@ namespace NtierApp.DAL.Context
 			base.OnModelCreating(modelBuilder);
 			modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 		}
-
-		public override int SaveChanges()
-		{
-			var entries = ChangeTracker.Entries<AuditableEntity>().ToList();
-			foreach(var entry in entries)
-			{
-				switch(entry.State)
-				{
-					case EntityState.Deleted:
-						entry.Entity.IsDeleted = true;
-						entry.Entity.DeletedAt = DateTime.Now;
-						break;
-					case EntityState.Modified:
-						entry.Entity.UpdatedAt = DateTime.Now;
-						break;
-					case EntityState.Added:
-						entry.Entity.CreatedAt = DateTime.Now;
-						break;
-				}
-			}
-			return base.SaveChanges();
-		}
 	}
 }

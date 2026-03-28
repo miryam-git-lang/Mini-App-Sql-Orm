@@ -9,9 +9,9 @@ namespace NtierApp.Core.Models
 {
 	public class MenuItem : BaseEntity
     {
-		public string Name { get; set; }
+		public string Name { get; set; } = null!;
 		public decimal Price { get; set; }
-		public List<OrderItem> OrderItems { get; set; }
-        public Enum.Category Category { get; set; }
+		public List<OrderItem> OrderItems { get; set; } = null!;
+		public Enum.Category Category { get; set; }
     }
 }

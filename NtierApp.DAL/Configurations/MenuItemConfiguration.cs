@@ -35,11 +35,6 @@ namespace NtierApp.DAL.Configurations
 				.Property(m => m.Category)
 				.HasConversion<int>()
 				.IsRequired();
-
-			builder
-				.Property(m => m.Number)
-				.ValueGeneratedOnAdd()
-				.UseIdentityColumn();
 		}
 	}
 }

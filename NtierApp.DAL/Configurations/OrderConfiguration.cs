@@ -29,11 +29,6 @@ namespace NtierApp.DAL.Configurations
 			builder
 				.Property(o => o.TotalAmount)
 				.HasColumnType("decimal(18,2)");
-
-			builder
-				.Property(o => o.Number)
-				.ValueGeneratedOnAdd()
-				.UseIdentityColumn();
 		}
 	}
 }
