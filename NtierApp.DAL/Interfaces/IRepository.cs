@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Query;
 using NtierApp.Core.Models;
 using NtierApp.Core.Models.Common;
 using System;

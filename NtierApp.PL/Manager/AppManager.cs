@@ -3,6 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using NtierApp.BLL.Dtos.OrderItemsDto;
+using NtierApp.BLL.Dtos.MenuItemsDtos;
+using NtierApp.BLL.Dtos.OrderDtos;
+using NtierApp.BLL.Interfaces;
+using NtierApp.BLL.Mappers;
 using NtierApp.BLL.Services;
 using NtierApp.Core.Models;
 using NtierApp.DAL.Concretes;
@@ -14,13 +21,13 @@ using Enum = System.Enum;
 
 namespace NtierApp.PL.Manager
 {
- public class AppManager
-	{
-	 public void Start()
-		{
+	 public class AppManager
+	 {
+		 public void Start()
+		 {
 			Console.OutputEncoding = Encoding.UTF8;
 			Console.InputEncoding = Encoding.UTF8;
-
+			
 			while (true)
 			{
 				DrawBanner("Main Menu");
@@ -38,7 +45,9 @@ namespace NtierApp.PL.Manager
 				switch (input)
 				{
 					case 1:
+
 						MenuService().Wait();
+
 						break;
 
 					case 2:
@@ -54,8 +63,18 @@ namespace NtierApp.PL.Manager
 				}
 			}
 		}
-        private async Task MenuService()
+		private async Task MenuService()
 		{
+			var serviceCollection = new ServiceCollection();
+			serviceCollection.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+			serviceCollection.AddScoped<IMenuItem, MenuItemService>();
+			serviceCollection.AddDbContext<AppDbContext>();
+			serviceCollection.AddAutoMapper(opt => opt.AddProfile(new MapProfile()));
+			serviceCollection.AddLogging();
+
+			var serviceProvider = serviceCollection.BuildServiceProvider();
+			var menuItemService = serviceProvider.GetRequiredService<IMenuItem>();
+
 			while (true)
 			{
 				DrawBanner("Menu Service");
@@ -127,16 +146,16 @@ namespace NtierApp.PL.Manager
 							}
 						}
 
-						MenuItem menuItem = new MenuItem();
-						menuItem.Name = name!;
-						menuItem.Price = price;
-						menuItem.Category = selectedCategory;
+						var menuItemDto = new MenuItemCreateDto
+						{
+							Name = name!,
+							Price = price,
+							Category = selectedCategory
+						};
 
-						IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
-						MenuItemService menuItemService = new MenuItemService(MenuRepository);
 						try
 						{
-							await menuItemService.AddMenuItem(menuItem);
+							await menuItemService.AddMenuItem(menuItemDto);
 							Console.WriteLine("Item added successfully!");
 						}
 						catch (Exception ex)
@@ -154,12 +173,10 @@ namespace NtierApp.PL.Manager
 				else if (input == 2)
 				{
 					MenuItem UpdatedMenuItem = new MenuItem();
-					IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
-					MenuItemService menuItemService = new MenuItemService(MenuRepository);
 
-                Console.WriteLine("Available items:");
-				var items = await menuItemService.MenuItems();
-				PrintMenuItemsTable(items);
+					Console.WriteLine("Available items:");
+					var items = await menuItemService.MenuItems();
+					PrintMenuItemsTable(items);
 
 					Console.WriteLine("Enter item details");
 					Console.WriteLine("Id:");
@@ -182,7 +199,13 @@ namespace NtierApp.PL.Manager
 							Console.WriteLine("Invalid category. Please try again.");
 							continue;
 						}
-						await menuItemService.EditMenuItem(id, UpdatedMenuItem);
+						var updatedMenuItemDto = new MenuItemCreateDto
+						{
+							Name = UpdatedMenuItem.Name,
+							Price = UpdatedMenuItem.Price,
+							Category = UpdatedMenuItem.Category
+						};
+						await menuItemService.EditMenuItem(id, updatedMenuItemDto);
 						Console.WriteLine("Item updated successfully!");
 					}
 					catch (Exception ex)
@@ -193,13 +216,11 @@ namespace NtierApp.PL.Manager
 
 				else if (input == 3)
 				{
-					MenuItem UpdatedMenuItem = new MenuItem();
-					IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
-					MenuItemService menuItemService = new MenuItemService(MenuRepository);
+					MenuItemCreateDto UpdatedMenuItem = new MenuItemCreateDto();
 
-                Console.WriteLine("Available items:");
-				var items = await menuItemService.MenuItems();
-				PrintMenuItemsTable(items);
+					Console.WriteLine("Available items:");
+					var items = await menuItemService.MenuItems();
+					PrintMenuItemsTable(items);
 
 					Console.WriteLine("Enter item details");
 					Console.WriteLine("Id:");
@@ -217,27 +238,22 @@ namespace NtierApp.PL.Manager
 
 				else if (input == 4)
 				{
-					IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
-					MenuItemService menuItemService = new MenuItemService(MenuRepository);
 
 					var items = await menuItemService.MenuItems();
 
-                 PrintMenuItemsTable(items);
+					PrintMenuItemsTable(items);
 				}
 
 				else if (input == 5)
 				{
-					IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
-					MenuItemService menuItemService = new MenuItemService(MenuRepository);
-
 					Console.WriteLine("Enter item details");
 					Console.WriteLine("Category (Appetizer, Soup, Salad, MainCourse, Grill, Dessert, Drink):");
 					var categoryInput = Console.ReadLine();
 
-                if (System.Enum.TryParse<NtierApp.Core.Models.Enum.Category>(categoryInput, ignoreCase: true, out var category))
-				{
-					var items = await menuItemService.GetByCategory(category);
-					PrintMenuItemsTable(items);
+					if (System.Enum.TryParse<NtierApp.Core.Models.Enum.Category>(categoryInput, ignoreCase: true, out var category))
+					{
+						var items = await menuItemService.GetByCategory(category);
+						PrintMenuItemsTable(items);
 					}
 					else
 					{
@@ -247,30 +263,24 @@ namespace NtierApp.PL.Manager
 
 				else if (input == 6)
 				{
-					IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
-					MenuItemService menuItemService = new MenuItemService(MenuRepository);
-
 					Console.WriteLine("Enter item details");
 					Console.WriteLine("Min price:");
 					var minPrice = decimal.Parse(Console.ReadLine());
 					Console.WriteLine("Max price:");
 					var maxPrice = decimal.Parse(Console.ReadLine());
 
-                var items = await menuItemService.GetByPriceInterval(minPrice, maxPrice);
-				PrintMenuItemsTable(items);
+					var items = await menuItemService.GetByPriceInterval(minPrice, maxPrice);
+					PrintMenuItemsTable(items);
 				}
 
 				else if (input == 7)
 				{
-					IRepository<MenuItem> MenuRepository = new Repository<MenuItem>(new AppDbContext());
-					MenuItemService menuItemService = new MenuItemService(MenuRepository);
-
 					Console.WriteLine("Enter item details");
 					Console.WriteLine("Name:");
 					var Name = Console.ReadLine();
 
-                var items = await menuItemService.GetByName(Name);
-				PrintMenuItemsTable(items);
+					var items = await menuItemService.GetByName(Name);
+					PrintMenuItemsTable(items);
 
 				}
 
@@ -279,8 +289,21 @@ namespace NtierApp.PL.Manager
 			}
 		}
 
-       private async Task OrderService()
+
+		private async Task OrderService()
 		{
+			var serviceCollection = new ServiceCollection();
+			serviceCollection.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+			serviceCollection.AddScoped<IMenuItem, MenuItemService>();
+			serviceCollection.AddScoped<IOrder, OrderService>();
+			serviceCollection.AddDbContext<AppDbContext>();
+			serviceCollection.AddAutoMapper(opt => opt.AddProfile(new MapProfile()));
+			serviceCollection.AddLogging();
+
+			var serviceProvider = serviceCollection.BuildServiceProvider();
+			var menuItemService = serviceProvider.GetRequiredService<IMenuItem>();
+			var orderService = serviceProvider.GetRequiredService<IOrder>();
+
 			while (true)
 			{
 				DrawBanner("Order Service");
@@ -303,70 +326,76 @@ namespace NtierApp.PL.Manager
 				{
 					try
 					{
-					IRepository<MenuItem> menuRepository = new Repository<MenuItem>(new AppDbContext());
-					MenuItemService menuItemService = new MenuItemService(menuRepository);
-					IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
-					OrderService orderService = new OrderService(orderRepository);
+						var items = await menuItemService.MenuItems();
 
-                  var items = await menuItemService.MenuItems();
-					if (items == null || items.Count == 0)
+						if (items == null || items.Count == 0)
+						{
+							WriteStatus("Menu is empty. Please add items first.", ConsoleColor.Yellow);
+							continue;
+						}
+
+                    PrintAvailableMenuItems(items);
+
+						var itemIdInput = Prompt("Enter menu item Id (Q to cancel)");
+						if (IsCancelInput(itemIdInput))
+						{
+							WriteStatus("Order creation cancelled.", ConsoleColor.DarkYellow);
+							continue;
+						}
+
+						if (!Guid.TryParse(itemIdInput, out var menuItemId))
+						{
+							WriteStatus("Invalid Id. Please try again.", ConsoleColor.Red);
+							continue;
+						}
+
+                   var selectedItem = items.FirstOrDefault(m => m.Id == menuItemId);
+						if (selectedItem == null)
+						{
+							WriteStatus("Menu item not found. Please try again.", ConsoleColor.Red);
+							continue;
+						}
+
+						if (!TryReadInt("Quantity", out var count) || count <= 0)
+						{
+							WriteStatus("Quantity must be a positive number.", ConsoleColor.Red);
+							continue;
+						}
+
+					var orderMenuItem = new MenuItem
 					{
-						WriteStatus("Menu is empty. Please add items first.", ConsoleColor.Yellow);
-						continue;
-					}
+						Id = selectedItem.Id,
+						Name = selectedItem.Name,
+						Price = selectedItem.Price,
+						Category = selectedItem.Category
+					};
 
-					Console.WriteLine("Available menu items:");
-					PrintMenuItemsTable(items);
-
-					var itemIdInput = Prompt("Enter menu item Id (Q to cancel)");
-					if (IsCancelInput(itemIdInput))
-					{
-						WriteStatus("Order creation cancelled.", ConsoleColor.DarkYellow);
-						continue;
-					}
-
-					if (!Guid.TryParse(itemIdInput, out var menuItemId))
-					{
-						WriteStatus("Invalid Id. Please try again.", ConsoleColor.Red);
-						continue;
-					}
-
-					var selectedItem = items.FirstOrDefault(m => m.Id == menuItemId);
-					if (selectedItem == null)
-					{
-						WriteStatus("Menu item not found. Please try again.", ConsoleColor.Red);
-						continue;
-					}
-
-					if (!TryReadInt("Quantity", out var count) || count <= 0)
-					{
-						WriteStatus("Quantity must be a positive number.", ConsoleColor.Red);
-						continue;
-					}
-
-                   var order = await orderService.AddOrder(selectedItem, count);
-					WriteStatus($"Order created successfully! ID: {order.Id} · Total: {FormatCurrency(order.TotalAmount)}", ConsoleColor.Green);
+                   var order = await orderService.AddOrder(orderMenuItem, count);
+						WriteStatus($"Order created successfully! ID: {order.Id} · Total: {FormatCurrency(order.TotalAmount)}", ConsoleColor.Green);
 
 					}
 					catch (Exception ex)
 					{
-                 WriteStatus($"Error adding order: {ex.Message}", ConsoleColor.Red);
+						WriteStatus($"Error adding order: {ex.Message}", ConsoleColor.Red);
 					}
 				}
 				else if (input == 2)
 				{
 					try
 					{
-						Order order = new Order();
+						OrderCreateDto order = new OrderCreateDto();
+						var orders = await orderService.Orders();
+						await PopulateOrderItemsAsync(orders, serviceProvider);
+						PrintOrdersTable(orders);
 						Console.WriteLine("Enter order details");
 						Console.WriteLine("Id:");
 						Guid id = Guid.Parse(Console.ReadLine());
 
-						IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
-						OrderService orderService = new OrderService(orderRepository);
-
 						await orderService.RemoveOrder(id);
 						Console.WriteLine("Order deleted successfully!");
+
+						var menuItemsAfterDeletion = await menuItemService.MenuItems();
+						
 					}
 					catch (Exception ex)
 					{
@@ -377,11 +406,9 @@ namespace NtierApp.PL.Manager
 				{
 					try
 					{
-						IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
-						OrderService orderService = new OrderService(orderRepository);
-
 						var orders = await orderService.Orders();
-                       PrintOrdersTable(orders);
+                       await PopulateOrderItemsAsync(orders, serviceProvider);
+						PrintOrdersTable(orders);
 					}
 					catch (Exception ex)
 					{
@@ -392,15 +419,13 @@ namespace NtierApp.PL.Manager
 				{
 					try
 					{
-						IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
-						OrderService orderService = new OrderService(orderRepository);
-
 						Console.WriteLine("Enter order details");
 						Console.WriteLine("Start date:");
 						DateTime startDate = DateTime.Parse(Console.ReadLine());
 						Console.WriteLine("End date:");
 						DateTime endDate = DateTime.Parse(Console.ReadLine());
                         var orders = await orderService.GetOrdersByDatesInterval(startDate, endDate);
+                       await PopulateOrderItemsAsync(orders, serviceProvider);
 						PrintOrdersTable(orders);
 					}
 					catch (Exception ex)
@@ -412,15 +437,13 @@ namespace NtierApp.PL.Manager
 				{
 					try
 					{
-						IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
-						OrderService orderService = new OrderService(orderRepository);
-
 						Console.WriteLine("Enter order details");
 						Console.WriteLine("Min amount:");
 						decimal minAmount = decimal.Parse(Console.ReadLine());
 						Console.WriteLine("Max amount:");
 						decimal maxAmount = decimal.Parse(Console.ReadLine());
                         var orders = await orderService.GetOrdersByPriceInterval(minAmount, maxAmount);
+                       await PopulateOrderItemsAsync(orders, serviceProvider);
 						PrintOrdersTable(orders);
 					}
 					catch (Exception ex)
@@ -432,14 +455,25 @@ namespace NtierApp.PL.Manager
 				{
 					try
 					{
-						IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
-						OrderService orderService = new OrderService(orderRepository);
-
 						Console.WriteLine("Enter order details");
 						Console.WriteLine("Date:");
-						DateTime date = DateTime.Parse(Console.ReadLine());
-                        var orders = await orderService.GetOrderByDate(date);
-						PrintOrdersTable(orders);
+                     var dateInput = Console.ReadLine();
+						if (!DateTime.TryParse(dateInput, out var date))
+						{
+							Console.WriteLine("Invalid date. Please enter a valid date.");
+							continue;
+						}
+						var orders = await orderService.GetOrderByDate(date);
+						var filteredOrders = orders?.Where(o => o.Date.Date == date.Date).ToList() ?? new List<OrderReturnDto>();
+
+						if (filteredOrders.Count == 0)
+						{
+							var allOrders = await orderService.Orders();
+							filteredOrders = allOrders.Where(o => o.Date.Date == date.Date).ToList();
+						}
+
+						await PopulateOrderItemsAsync(filteredOrders, serviceProvider);
+						PrintOrdersTable(filteredOrders);
 					}
 					catch (Exception ex)
 					{
@@ -449,21 +483,22 @@ namespace NtierApp.PL.Manager
                 else if (input == 7)
 				{
 					try
-					{
-						IRepository<Order> orderRepository = new Repository<Order>(new AppDbContext());
-						OrderService orderService = new OrderService(orderRepository);
-
+					{ 
 						Console.WriteLine("Enter order details");
 						Console.WriteLine("Id:");
 						Guid id = Guid.Parse(Console.ReadLine());
-                     var order = await orderService.GetOrderByNo(id);
+
+						var order = await orderService.GetOrderByNo(id);
+
 						if (order == null)
 						{
 							Console.WriteLine("Order not found.");
 						}
 						else
 						{
-							PrintOrdersTable(new[] { order });
+                          var singleOrderList = new List<OrderReturnDto> { order };
+							await PopulateOrderItemsAsync(singleOrderList, serviceProvider);
+							PrintOrdersTable(singleOrderList);
 						}
 					}
 					catch (Exception ex)
@@ -478,26 +513,38 @@ namespace NtierApp.PL.Manager
 
 		}
 
-     private const string ManatSymbol = "₼";
+
+		private const string ManatSymbol = "₼";
 
 		private static string FormatCurrency(decimal amount)
 		{
 			return $"{amount:0.00} {ManatSymbol}";
 		}
 
-		private static string FormatOrderItems(Order order)
+     private static string FormatOrderItems(OrderReturnDto order)
 		{
-			if (order?.OrderItems == null || order.OrderItems.Count == 0)
+			if (order?.Items == null || order.Items.Count == 0)
 				return "-";
 
-			return string.Join(", ", order.OrderItems.Select(oi =>
+			return string.Join(", ", order.Items.Select(oi =>
 			{
-				var name = oi.MenuItem?.Name ?? "Item";
+				var name = string.IsNullOrWhiteSpace(oi.MenuItemName) ? "Item" : oi.MenuItemName;
 				return $"{name} x{oi.Count}";
 			}));
 		}
 
-        private static void PrintMenuItemsTable(IEnumerable<MenuItem> items)
+	private static void PrintAvailableMenuItems(IEnumerable<MenuItemReturnDto> items)
+	{
+		Console.WriteLine("------------------------------");
+		Console.WriteLine("Available menu items:");
+		Console.WriteLine("------------------------------");
+
+		foreach (var item in items ?? Enumerable.Empty<MenuItemReturnDto>())
+			Console.WriteLine($"{item.Id} {item.Name} {FormatCurrency(item.Price)}");
+		Console.WriteLine("------------------------------");
+	}
+
+		private static void PrintMenuItemsTable(IEnumerable<MenuItemReturnDto> items)
 		{
 			const string format = "{0,-36} | {1,-20} | {2,-12} | {3,15}";
 			Console.WriteLine();
@@ -507,20 +554,65 @@ namespace NtierApp.PL.Manager
 				Console.WriteLine(format, item.Id, item.Name, item.Category, FormatCurrency(item.Price));
 		}
 
-     private static void PrintOrdersTable(IEnumerable<Order> orders)
+     private static void PrintOrdersTable(IEnumerable<OrderReturnDto> orders)
 		{
 			const string format = "{0,-36} | {1,15} | {2,19} | {3}";
 			Console.WriteLine();
 			Console.WriteLine(format, "ID", "Total", "Date", "Items");
 			Console.WriteLine(new string('-', 120));
-			foreach (var order in orders ?? Enumerable.Empty<Order>())
+          foreach (var order in orders ?? Enumerable.Empty<OrderReturnDto>())
 			{
 				var dateText = order.Date.ToString("yyyy-MM-dd HH:mm");
-				Console.WriteLine(format, order.Id, FormatCurrency(order.TotalAmount), dateText, FormatOrderItems(order));
+              Console.WriteLine(format, order.Id, FormatCurrency(order.TotalAmount), dateText, FormatOrderItems(order));
 			}
 		}
 
-		// Console helpers for consistent layout and input handling.
+	private static async Task PopulateOrderItemsAsync(IEnumerable<OrderReturnDto>? orders, IServiceProvider serviceProvider)
+	{
+		if (orders == null)
+			return;
+
+		var orderList = orders.Where(o => o != null).ToList();
+		if (orderList.Count == 0)
+			return;
+
+		var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
+		var orderIds = orderList.Select(o => o.Id).Distinct().ToList();
+
+		var orderItemsData = await dbContext.OrderItems
+			.Where(oi => orderIds.Contains(oi.OrderId))
+			.Select(oi => new
+			{
+				oi.OrderId,
+				oi.Count,
+				MenuItemName = oi.MenuItem.Name,
+				Price = oi.MenuItem.Price
+			})
+			.ToListAsync();
+
+		var lookup = orderItemsData
+			.GroupBy(item => item.OrderId)
+			.ToDictionary(
+				g => g.Key,
+				g => g.Select(item => new OrderItemReturnDto
+				{
+					MenuItemName = item.MenuItemName,
+					Count = item.Count,
+					Price = item.Price
+				}).ToList());
+
+		foreach (var order in orderList)
+		{
+			if (lookup.TryGetValue(order.Id, out var items))
+			{
+				order.Items = items;
+			}
+			else if (order.Items == null)
+			{
+				order.Items = new List<OrderItemReturnDto>();
+			}
+		}
+	}
 		private static void DrawBanner(string title)
 		{
 			Console.WriteLine();
@@ -560,5 +652,4 @@ namespace NtierApp.PL.Manager
 		}
 
 	}
-
 }
